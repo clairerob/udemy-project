@@ -3,11 +3,12 @@ const app = express()
 const path = require('path')
 const mongoose = require('mongoose')
 const Campground = require('./models/campground')
+const Review = require('./models/review')
 const methodOverride = require('method-override')
 const engine = require('ejs-mate')
 const wrapAsync = require('./utils/wrapAsync')
 const ExpressError = require('./utils/ExpressError')
-const { campgroundSchema } = require('./schemas')
+const { campgroundSchema, reviewSchema } = require('./schemas')
 
 main().catch((err) => console.log(err))
 
@@ -27,6 +28,16 @@ app.use(methodOverride('_method'))
 const validateCampground = (req, res, next) => {
 	const { error } = campgroundSchema.validate(req.body)
 	console.log(error)
+	if (error) {
+		const msg = error.details.map((el) => el.message).join(',')
+		throw new ExpressError(msg, 400)
+	} else {
+		next()
+	}
+}
+
+const validateReview = (req, res, next) => {
+	const { error } = reviewSchema.validate(req.body)
 	if (error) {
 		const msg = error.details.map((el) => el.message).join(',')
 		throw new ExpressError(msg, 400)
@@ -63,7 +74,9 @@ app.post(
 app.get(
 	'/campgrounds/:id',
 	wrapAsync(async (req, res) => {
-		const campground = await Campground.findById(req.params.id)
+		const campground = await Campground.findById(req.params.id).populate(
+			'reviews'
+		)
 		res.render('campgrounds/show', { campground })
 	})
 )
@@ -98,6 +111,30 @@ app.delete(
 		const { id } = req.params
 		const campground = await Campground.findByIdAndDelete(id)
 		res.redirect('/campgrounds')
+	})
+)
+
+app.post(
+	'/campgrounds/:id/reviews',
+	validateReview,
+	wrapAsync(async (req, res) => {
+		const campground = await Campground.findById(req.params.id)
+		const review = new Review(req.body.review)
+		campground.reviews.push(review)
+		//should be doing this in parallel, hopefully he revisits?? or i explore
+		await review.save()
+		await campground.save()
+		res.redirect(`/campgrounds/${campground._id}`)
+	})
+)
+
+app.delete(
+	'/campgrounds/:id/reviews/:reviewId',
+	wrapAsync(async (req, res) => {
+		const { id, reviewId } = req.params
+		await Campground.findByIdAndUpdate(id, { $pull: { reviews: reviewId } })
+		await Review.findByIdAndDelete(reviewId)
+		res.redirect(`/campgrounds/${id}`)
 	})
 )
 
