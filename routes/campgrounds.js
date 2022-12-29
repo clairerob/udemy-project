@@ -3,11 +3,17 @@ const router = express.Router()
 const wrapAsync = require('../utils/wrapAsync')
 const { isLoggedIn, isAuthor, validateCampground } = require('../middleware')
 const campgrounds = require('../controllers/campgrounds')
+const multer = require('multer')
+const { storage } = require('../cloudinary')
+const upload = multer({ storage })
 
-router
-	.route('/')
-	.get(wrapAsync(campgrounds.index))
-	.post(isLoggedIn, validateCampground, wrapAsync(campgrounds.createCampground))
+router.route('/').get(wrapAsync(campgrounds.index)).post(
+	isLoggedIn,
+	upload.array('image'),
+	//ideally don't want to upload images before validating the other data but stuck with that for the moment because of multer's workings, find workaround
+	validateCampground,
+	wrapAsync(campgrounds.createCampground)
+)
 
 router.get('/new', isLoggedIn, campgrounds.renderNewForm)
 
@@ -17,6 +23,7 @@ router
 	.put(
 		isLoggedIn,
 		isAuthor,
+		upload.array('image'),
 		validateCampground,
 		wrapAsync(campgrounds.updateCampground)
 	)
