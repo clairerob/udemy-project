@@ -2,6 +2,6 @@
 
 
 *.env
-
+.git.bfg-report/
 
 node_modules/

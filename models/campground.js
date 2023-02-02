@@ -11,6 +11,15 @@ ImageSchema.virtual('thumbnail').get(function () {
 	return this.url.replace('/upload', '/upload/w_200')
 })
 
+const ImageSchema = new Schema({
+	url: String,
+	filename: String,
+})
+//virtuals are derived from information in the schema, so don't store (unless big chunky calc)
+ImageSchema.virtual('thumbnail').get(function () {
+	return this.url.replace('/upload', '/upload/w_200')
+})
+
 const CampgroundSchema = new Schema({
 	title: String,
 	images: [ImageSchema],
