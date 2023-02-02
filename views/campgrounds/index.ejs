@@ -6,7 +6,12 @@
             <div class='card mb-3'>
                 <div class='row'>
                     <div class='col-md-4'>
-                        <img src='<%=campground.images[0].url%>' class='img-fluid' alt='<%=campground.title%>'>
+                        <% if (campground.images.length) { %>
+                            <img src='<%=campground.images[0].url%>' class='img-fluid' alt='<%=campground.title%>'>
+                            <% } else { %>
+                                <img src='https://www.nps.gov/grte/planyourvisit/images/JLCG_tents_Teewinot_2008_mattson_1.JPG?maxwidth=1200&maxheight=1200&autorotate=false'
+                                    class='img-fluid' alt='<%=campground.title%>'>
+                                <% } %>
                     </div>
                     <div class='col-md-8'>
                         <h5 class='card-title'>
