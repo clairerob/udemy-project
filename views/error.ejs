@@ -7,9 +7,11 @@
                 <p>
                     <%=err.message%>
                 </p>
-                <p>For dev only: <br />
-                    <%=err.stack%>
-                </p>
+                <% if (process.env.NODE_ENV !=="production" ) { %>
+                    <p>
+                        <%=err.stack%>
+                    </p>
+                    <% } %>
             </div>
         </div>
     </div>
