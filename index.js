@@ -19,15 +19,13 @@ const mongoSanitize = require('express-mongo-sanitize')
 const userRoutes = require('./routes/users')
 const campgroundRoutes = require('./routes/campgrounds')
 const reviewRoutes = require('./routes/reviews')
-// const bodyParser = require('body-parser');
-const dbUrl = process.env.DB_URL
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'
 const MongoStore = require('connect-mongo')
 
 main().catch((err) => console.log(err))
 
 async function main() {
-	await mongoose.connect('mongodb://localhost:27017/yelp-camp')
-	// await mongoose.connect(dbUrl)
+	await mongoose.connect(dbUrl)
 	console.log('mongo connected')
 }
 
@@ -95,11 +93,12 @@ app.use(
 	})
 )
 
+const secret = process.env.SECRET || 'biiiglamemystery'
+
 const store = MongoStore.create({
-	mongoUrl: 'mongodb://localhost:27017/yelp-camp',
-	// url: dbUrl,
+	mongoUrl: dbUrl,
 	crypto: {
-		secret: 'mystery',
+		secret,
 	},
 	touchAfter: 24 * 60 * 60, //lazy update the session by limiting a period of time on every refresh (here 24hrs)
 })
@@ -110,7 +109,7 @@ store.on('error', function (e) {
 
 const sessionConfig = {
 	name: 'session_cooks',
-	secret: 'mystery',
+	secret,
 	resave: false,
 	saveUninitialized: true,
 	cookie: {
