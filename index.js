@@ -6,7 +6,7 @@ const express = require('express')
 const path = require('path')
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', true)
-const engine = require('ejs-mate')
+const ejsMate = require('ejs-mate')
 const session = require('express-session')
 const flash = require('connect-flash')
 const ExpressError = require('./utils/ExpressError')
@@ -14,24 +14,26 @@ const methodOverride = require('method-override')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const User = require('./models/user')
-// const bodyParser = require('body-parser');
-const mongoSanitize = require('express-mongo-sanitize')
 const helmet = require('helmet')
-
+const mongoSanitize = require('express-mongo-sanitize')
 const userRoutes = require('./routes/users')
 const campgroundRoutes = require('./routes/campgrounds')
 const reviewRoutes = require('./routes/reviews')
+// const bodyParser = require('body-parser');
+const dbUrl = process.env.DB_URL
+const MongoStore = require('connect-mongo')
 
 main().catch((err) => console.log(err))
 
 async function main() {
 	await mongoose.connect('mongodb://localhost:27017/yelp-camp')
+	// await mongoose.connect(dbUrl)
 	console.log('mongo connected')
 }
 
 const app = express()
 
-app.engine('ejs', engine)
+app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
@@ -41,7 +43,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 // app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 app.use(mongoSanitize())
-app.use(helmet())
 
 //download some of this stuff
 const scriptSrcUrls = [
@@ -51,6 +52,7 @@ const scriptSrcUrls = [
 	'https://kit.fontawesome.com/',
 	'https://cdnjs.cloudflare.com/',
 	'https://cdn.jsdelivr.net',
+	'https://res.cloudinary.com/dxbzza0xl/',
 ]
 const styleSrcUrls = [
 	'https://kit-free.fontawesome.com/',
@@ -59,18 +61,21 @@ const styleSrcUrls = [
 	'https://api.tiles.mapbox.com/',
 	'https://fonts.googleapis.com/',
 	'https://use.fontawesome.com/',
+	'https://cdn.jsdelivr.net',
+	'https://res.cloudinary.com/dxbzza0xl/',
 ]
 const connectSrcUrls = [
 	'https://api.mapbox.com/',
-	'https://a.tiles.mapbox.com/',
-	'https://b.tiles.mapbox.com/',
+	'https://*.tiles.mapbox.com/',
 	'https://events.mapbox.com/',
+	'https://res.cloudinary.com/dxbzza0xl/',
 ]
-const fontSrcUrls = []
+const fontSrcUrls = ['https://res.cloudinary.com/dxbzza0xl/']
+
 app.use(
 	helmet.contentSecurityPolicy({
 		directives: {
-			defaultSrc: {},
+			defaultSrc: [],
 			connectSrc: ['self', ...connectSrcUrls],
 			scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
 			styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
@@ -84,9 +89,24 @@ app.use(
 				'https://images.unsplash.com/',
 			],
 			fontSrc: ["'self'", ...fontSrcUrls],
+			mediaSrc: ['https://res.cloudinary.com/dxbzza0xl/'],
+			childSrc: ['blob:'],
 		},
 	})
 )
+
+const store = MongoStore.create({
+	mongoUrl: 'mongodb://localhost:27017/yelp-camp',
+	// url: dbUrl,
+	crypto: {
+		secret: 'mystery',
+	},
+	touchAfter: 24 * 60 * 60, //lazy update the session by limiting a period of time on every refresh (here 24hrs)
+})
+
+store.on('error', function (e) {
+	console.log(`SESSION STORE ERROR ${e}`)
+})
 
 const sessionConfig = {
 	name: 'session_cooks',
@@ -99,6 +119,7 @@ const sessionConfig = {
 		httpOnly: true,
 		// secure: true, --deploying only, cuz localhost isnt https
 	},
+	store,
 }
 app.use(session(sessionConfig))
 app.use(flash())
@@ -106,7 +127,6 @@ app.use(flash())
 app.use(passport.initialize())
 app.use(passport.session())
 passport.use(new LocalStrategy(User.authenticate()))
-
 passport.serializeUser(User.serializeUser())
 passport.deserializeUser(User.deserializeUser())
 
