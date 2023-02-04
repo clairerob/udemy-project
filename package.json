@@ -8,7 +8,7 @@
 		"start": "node index.js"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Claire Roberts",
 	"license": "ISC",
 	"dependencies": {
 		"@mapbox/mapbox-sdk": "^0.14.0",
