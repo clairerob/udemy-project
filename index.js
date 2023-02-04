@@ -108,7 +108,7 @@ store.on('error', function (e) {
 })
 
 const sessionConfig = {
-	name: 'session_cooks',
+	name: 'session_cookies',
 	secret,
 	resave: false,
 	saveUninitialized: true,
@@ -136,13 +136,6 @@ app.use((req, res, next) => {
 	next()
 })
 
-//testy test create user
-// app.get('/fakeuser', async (req, res) => {
-// 	const user = new User({ email: 'lala@gmail.com', username: 'Willie' })
-// 	const newUser = await User.register(user, 'iloveclaire')
-// 	res.send(newUser)
-// })
-
 app.use('/', userRoutes)
 app.use('/campgrounds', campgroundRoutes)
 app.use('/campgrounds/:id/reviews', reviewRoutes)
@@ -163,5 +156,5 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
-	console.log('hooray')
+	console.log(`hooray, port ${port}`)
 })
