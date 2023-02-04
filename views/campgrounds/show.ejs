@@ -4,7 +4,6 @@
 
     <div class="row">
         <div class="col-6">
-            <div id='show-map'></div>
 
             <div id="campsiteCarousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-inner">
@@ -64,6 +63,9 @@
             </div>
         </div>
         <div class="col-6">
+
+            <div id='show-map'></div>
+
             <% if(currentUser){%>
                 <h2 class='mb-4'>Add Your Review</h2>
                 <form class='mb-4 validated-form' action='/campgrounds/<%=campground._id%>/reviews' method='POST'

@@ -2,11 +2,12 @@ const mongoose = require('mongoose')
 const Campground = require('../models/campground')
 const cities = require('./cities')
 const { places, descriptors } = require('./seedHelpers')
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'
 
 main().catch((err) => console.log(err))
 
 async function main() {
-	await mongoose.connect('mongodb://localhost:27017/yelp-camp')
+	await mongoose.connect(dbUrl)
 	console.log('mongo connected')
 }
 

@@ -108,7 +108,7 @@ store.on('error', function (e) {
 })
 
 const sessionConfig = {
-	name: 'session_cookies',
+	name: 'session_cooks',
 	secret,
 	resave: false,
 	saveUninitialized: true,
@@ -116,7 +116,7 @@ const sessionConfig = {
 		expires: Date.now() + 360000 * 24 * 7,
 		maxAge: 360000 * 24 * 7,
 		httpOnly: true,
-		secure: true,
+		// secure: true, --deploying only, cuz localhost isnt https
 	},
 	store,
 }
