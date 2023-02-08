@@ -1,7 +1,11 @@
-assorted extra functionality bits to add in:
+Course project from  https://www.udemy.com/course/the-web-developer-bootcamp/ 
+
+Assorted extra functionality bits to add in:
 
 - photos crud
 - photos size and volume limit
 - other users photo addition/protect for own or camp owner deletion
 - maps error handling and styles(custom/presets)
 - handle missing fields on creation (esp photo)
+- change styling
+- reseed db
